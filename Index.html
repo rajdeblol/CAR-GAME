@@ -1,0 +1,891 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;3D Car Scene - Mobile Controls&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Prevent scrollbars */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #a0d7e6;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Light sky blue background */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: 'Press Start 2P', cursive, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* A retro arcade font for style */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Prevent default touch behaviors like pull-to-refresh or selection */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overscroll-behavior: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>touch-action: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* For pointer events, might help on some devices */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>canvas {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: block;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Remove annoying space below canvas */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#loading-screen {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #000;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* For progress text */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 100;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: opacity 0.5s ease-out;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#loading-screen.hidden {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>opacity: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Disable interaction after fading */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#loading-text {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#loading-progress {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.8em;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* --- UI Elements --- */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>#ui-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* White text */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 1px 1px 3px black;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Black shadow for readability */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 50;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.5em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Slightly larger font */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Let clicks pass through */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#score {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 5px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#game-over {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>top: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transform: translate(-50%, -50%);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #ff4444;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Bright red */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 4em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Large text */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-shadow: 2px 2px 5px black;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Stronger shadow */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Hidden initially */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 101;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Above everything else */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Enable clicks on restart button */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#restart-button {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #21c60ffc;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: white;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.4em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Relative to parent font-size */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: background-color 0.3s ease;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#restart-button:hover {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #0056b3;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* --- Mobile Control Buttons --- */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-button {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>position: absolute;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Position from bottom */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>width: 80px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Button width */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>height: 80px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Button height */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(255, 255, 255, 0.3);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Semi-transparent white */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 2px solid rgba(0, 0, 0, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Darker border */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 50%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Circular buttons */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>z-index: 60;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Above canvas, below game over */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* For centering arrow inside */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 2.5em;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Arrow size */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: rgba(0, 0, 0, 0.7);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Arrow color */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>cursor: pointer;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Indicate clickable */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Prevent text selection on tap */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-ms-user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-moz-user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Prevent iOS tap highlight */</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-tap-highlight-color: transparent;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointer-events: auto;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Allow interaction */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Style for when button is pressed */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>.control-button:active {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: rgba(255, 255, 255, 0.5);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#left-button {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>left: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Position left button */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>#right-button {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>right: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>/* Position right button */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* --- End Mobile Control Buttons --- */</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>/* Import Google Font for UI */</p>
+<p class="p1"><span class="Apple-converted-space">        </span>@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="loading-screen"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="loading-text"&gt;Loading Game...&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="loading-progress"&gt;0%&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="container"&gt;&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="ui-container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div id="score"&gt;Score: 0&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="game-over"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>GAME OVER!</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;button id="restart-button"&gt;Restart&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="left-button" class="control-button"&gt;◀&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="right-button" class="control-button"&gt;▶&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="importmap"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{</p>
+<p class="p1"><span class="Apple-converted-space">            </span>"imports": {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>"three": "https://unpkg.com/three@0.164.1/build/three.module.js",</p>
+<p class="p1"><span class="Apple-converted-space">                </span>"three/addons/": "https://unpkg.com/three@0.164.1/examples/jsm/"</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script type="module"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>import * as THREE from 'three';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';</p>
+<p class="p1"><span class="Apple-converted-space">        </span>import { RGBELoader } from 'three/addons/loaders/RGBELoader.js'; // For HDRI</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>let scene, camera, renderer, carModel, enemyCar;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let ambientLight, directionalLight;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let road, roadLines = [], kerbs = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let buildings = [], streetLights = [], trafficLights = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const roadWidth = 10;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const roadLength = 200; // Visible length of the road</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const sceneryRecycleDistance = roadLength / 2; // Distance to recycle scenery elements</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const buildingSpacing = 15;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const lightSpacing = 30;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const numBuildings = Math.floor(roadLength * 1.5 / buildingSpacing); // Spawn more buildings to cover recycle distance</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const numLights = Math.floor(roadLength * 1.5 / lightSpacing);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const driveSpeed = 0.5; // Scenery scroll speed (player's effective forward speed)</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const enemyCarSpeed = 0.6; // Enemy moves faster relative to scenery scroll</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const kerbHeight = 0.2;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const kerbWidth = 0.3;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Game State ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let moveLeft = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let moveRight = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const carMoveSpeed = 0.15; // How fast the player car moves left/right</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let carBaseY = 0; // Will be calculated based on car model bounding box</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let score = 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let isGameOver = false;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- End Game State ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Points ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const points = [];</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const numPoints = 15;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const pointValue = 10;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let pointGeometry, pointMaterial;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const pointRadius = 0.3;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- End Points ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- UI Elements References ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const loadingScreen = document.getElementById('loading-screen');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const loadingProgress = document.getElementById('loading-progress');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const scoreElement = document.getElementById('score');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const gameOverElement = document.getElementById('game-over');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const restartButton = document.getElementById('restart-button');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- End UI Refs ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Bounding Boxes (for collision detection) ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let playerBox = new THREE.Box3();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let enemyBox = new THREE.Box3();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>let pointBox = new THREE.Box3();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- End Bounding Boxes ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>const loadingManager = new THREE.LoadingManager();</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// Loading Manager Callbacks</p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadingManager.onLoad = () =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>console.log("All resources loaded!");</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadingScreen.classList.add('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>setTimeout(() =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (loadingScreen) loadingScreen.style.display = 'none';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Start game loop after loading screen fades</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!isGameOver) animate(); // Ensure animate starts only once after loading</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}, 600);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadingManager.onError = (url) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>console.error(`There was an error loading ${url}`);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadingScreen.textContent = `Error loading: ${url}. Check console.`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadingScreen.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadingScreen.style.opacity = 1;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p1"><span class="Apple-converted-space">        </span>loadingManager.onProgress = (url, itemsLoaded, itemsTotal) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const progress = Math.round((itemsLoaded / itemsTotal) * 100);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loadingProgress.textContent = `${progress}%`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>};</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>init(); // Initialize the scene and elements</p>
+<p class="p1"><span class="Apple-converted-space">        </span>setupControls(); // Set up both keyboard and touch controls</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// animate() will be called by loadingManager.onLoad after everything is ready.</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function init() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Basic Setup ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene = new THREE.Scene();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.background = new THREE.Color(0xa0d7e6); // Default background before HDRI</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.fog = new THREE.Fog(0xa0d7e6, roadLength * 0.4, roadLength * 0.9); // Fog for depth</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Initial camera position (will be adjusted after car model loads)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>camera.position.set(0, 3, -7);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer = new THREE.WebGLRenderer({ antialias: true });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.setSize(window.innerWidth, window.innerHeight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.shadowMap.enabled = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Softer shadows</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.toneMapping = THREE.ACESFilmicToneMapping; // For PBR realism</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.toneMappingExposure = 1.2; // Adjust exposure for HDRI</p>
+<p class="p1"><span class="Apple-converted-space">            </span>document.getElementById('container').appendChild(renderer.domElement);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Lights ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Softer ambient light</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(ambientLight);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight = new THREE.DirectionalLight(0xffffff, 1.5); // Main light (sun)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.position.set(50, 100, 50);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.mapSize.width = 2048;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.mapSize.height = 2048;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.near = 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.far = 200;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.left = -50;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.right = 50;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.top = 50;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>directionalLight.shadow.camera.bottom = -50;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(directionalLight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(directionalLight.target); // Target for directional light</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- HDRI Environment Map ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Using a common HDRI from Three.js examples (adjust path/name if you have your own)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const hdrPath = 'https://threejs.org/examples/textures/equirectangular/';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const hdrName = 'venice_sunset_1k.hdr'; // Or 'royal_esplanade_1k.hdr', 'memorial_park_1k.hdr'</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>new RGBELoader(loadingManager) // Use loadingManager</p>
+<p class="p1"><span class="Apple-converted-space">                </span>.setPath(hdrPath)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>.load(hdrName, function (texture) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>texture.mapping = THREE.EquirectangularReflectionMapping;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>scene.environment = texture; // Apply to reflective materials</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>scene.background = texture; // Use as background</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}, undefined, (error) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>console.error('Error loading HDRI:', error);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>scene.background = new THREE.Color(0xa0d7e6); // Fallback to solid color</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Ground, Road, Lines, Kerbs ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const groundGeo = new THREE.PlaneGeometry(roadWidth * 5, roadLength * 1.5); // Wider ground</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const groundMat = new THREE.MeshStandardMaterial({ color: 0x55aa55, side: THREE.DoubleSide, roughness: 0.9, metalness: 0.1 });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const ground = new THREE.Mesh(groundGeo, groundMat);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>ground.rotation.x = -Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>ground.position.y = -0.05;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>ground.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(ground);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const roadGeo = new THREE.PlaneGeometry(roadWidth, roadLength * 1.5); // Longer road for smooth scrolling</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const roadMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.7, metalness: 0.1 }); // Darker, slightly reflective asphalt</p>
+<p class="p1"><span class="Apple-converted-space">            </span>road = new THREE.Mesh(roadGeo, roadMat);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>road.rotation.x = -Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>road.position.y = 0.0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>road.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(road);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lineLength = 4;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lineGap = 4;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const numLines = Math.floor(roadLength * 1.5 / (lineLength + lineGap)); // More lines</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lineGeo = new THREE.PlaneGeometry(0.3, lineLength);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const lineMat = new THREE.MeshStandardMaterial({ color: 0xffffff, side: THREE.DoubleSide, roughness: 0.2, metalness: 0.0 });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; numLines; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const line = new THREE.Mesh(lineGeo, lineMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.rotation.x = -Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.position.y = 0.005; // Slightly above road to prevent Z-fighting</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.position.z = (roadLength * 1.5 / 2) - (lineLength / 2) - i * (lineLength + lineGap);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>roadLines.push(line);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(line);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>function createKerbTexture() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const canvas = document.createElement('canvas');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const ctx = canvas.getContext('2d');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>canvas.width = 64;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>canvas.height = 16;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const stripeWidth = 8;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const colors = ['#ff0000', '#ffffff'];</p>
+<p class="p1"><span class="Apple-converted-space">                </span>for (let i = 0; i &lt; canvas.width / stripeWidth; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>ctx.fillStyle = colors[i % 2];</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>ctx.fillRect(i * stripeWidth, 0, stripeWidth, canvas.height);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return new THREE.CanvasTexture(canvas);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const kerbTexture = createKerbTexture();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbTexture.wrapS = THREE.RepeatWrapping;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbTexture.wrapT = THREE.ClampToEdgeWrapping;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbTexture.repeat.set(roadLength * 1.5 / 4, 1); // Repeat over longer road</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const kerbGeo = new THREE.BoxGeometry(kerbWidth, kerbHeight, roadLength * 1.5);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const kerbMat = new THREE.MeshStandardMaterial({ map: kerbTexture, roughness: 0.7, metalness: 0.1 });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const kerbLeft = new THREE.Mesh(kerbGeo, kerbMat);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbLeft.position.set(-(roadWidth / 2) - (kerbWidth / 2), kerbHeight / 2, 0);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbLeft.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbLeft.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(kerbLeft);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbs.push(kerbLeft);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const kerbRight = new THREE.Mesh(kerbGeo, kerbMat);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbRight.position.set((roadWidth / 2) + (kerbWidth / 2), kerbHeight / 2, 0);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbRight.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbRight.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(kerbRight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbs.push(kerbRight);</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Buildings, Street Lights, Traffic Lights ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>function createBuilding() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const height = Math.random() * 30 + 10;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const width = Math.random() * 8 + 4;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const depth = Math.random() * 8 + 4;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const buildingGeo = new THREE.BoxGeometry(width, height, depth);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const buildingMat = new THREE.MeshStandardMaterial({</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>color: new THREE.Color(Math.random() * 0.6 + 0.2, Math.random() * 0.6 + 0.2, Math.random() * 0.6 + 0.2), // Grayscale-ish colors</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>roughness: 0.8,</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>metalness: 0.1</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const building = new THREE.Mesh(buildingGeo, buildingMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>building.position.y = height / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>building.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>building.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return building;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; numBuildings; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const buildingLeft = createBuilding();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const buildingRight = createBuilding();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const zPos = (roadLength * 1.5 / 2) - (buildingSpacing / 2) - i * buildingSpacing;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xOffsetLeft = roadWidth / 2 + kerbWidth + 1 + Math.random() * 5 + buildingLeft.geometry.parameters.width / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xOffsetRight = roadWidth / 2 + kerbWidth + 1 + Math.random() * 5 + buildingRight.geometry.parameters.width / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>buildingLeft.position.set(-xOffsetLeft, buildingLeft.position.y, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>buildingRight.position.set(xOffsetRight, buildingRight.position.y, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>buildings.push(buildingLeft, buildingRight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(buildingLeft);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(buildingRight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>function createStreetLight() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const group = new THREE.Group();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleHeight = 6;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleRadius = 0.1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius, poleHeight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.8, roughness: 0.4 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const pole = new THREE.Mesh(poleGeo, poleMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>pole.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>pole.position.y = poleHeight / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.add(pole);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const armLength = 1.5; // Longer arm</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const armGeo = new THREE.BoxGeometry(armLength, poleRadius * 1.5, poleRadius * 1.5);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const arm = new THREE.Mesh(armGeo, poleMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>arm.position.set(0, poleHeight - poleRadius * 2, 0); // Position arm correctly</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.add(arm);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightFixtureGeo = new THREE.SphereGeometry(poleRadius * 2, 16, 8);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightFixtureMat = new THREE.MeshStandardMaterial({ color: 0xffffaa, emissive: 0xffff00, emissiveIntensity: 0.5 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightFixture = new THREE.Mesh(lightFixtureGeo, lightFixtureMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightFixture.position.set(0, poleHeight - poleRadius * 2, 0); // Position fixture correctly</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.add(lightFixture);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.userData.armLength = armLength; // Store for positioning later</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return group;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; numLights; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightLeft = createStreetLight();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightRight = createStreetLight();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const zPos = (roadLength * 1.5 / 2) - (lightSpacing / 2) - i * lightSpacing;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xPos = roadWidth / 2 + kerbWidth + 0.8;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightLeft.position.set(-xPos, 0, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightLeft.rotation.y = Math.PI / 2; // Rotate to face road</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightLeft.children[1].position.x = -lightLeft.userData.armLength / 2; // Arm extends inwards</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightLeft.children[2].position.x = -lightLeft.userData.armLength; // Light at end of arm</p>
+<p class="p1"><span class="Apple-converted-space">                </span>streetLights.push(lightLeft);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(lightLeft);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightRight.position.set(xPos, 0, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightRight.rotation.y = -Math.PI / 2; // Rotate to face road</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightRight.children[1].position.x = -lightRight.userData.armLength / 2; // Arm extends inwards</p>
+<p class="p1"><span class="Apple-converted-space">                </span>lightRight.children[2].position.x = -lightRight.userData.armLength; // Light at end of arm</p>
+<p class="p1"><span class="Apple-converted-space">                </span>streetLights.push(lightRight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(lightRight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>function createTrafficLight() {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const group = new THREE.Group();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleHeight = 5;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleRadius = 0.15;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleGeo = new THREE.CylinderGeometry(poleRadius, poleRadius, poleHeight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const poleMat = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.7, roughness: 0.5 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const pole = new THREE.Mesh(poleGeo, poleMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>pole.position.y = poleHeight / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>pole.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.add(pole);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housingWidth = 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housingHeight = 1.2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housingDepth = 0.3;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housingGeo = new THREE.BoxGeometry(housingWidth, housingHeight, housingDepth);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housingMat = new THREE.MeshStandardMaterial({ color: 0x333333 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const housing = new THREE.Mesh(housingGeo, housingMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>housing.position.y = poleHeight - housingHeight / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>housing.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>group.add(housing);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightRadius = housingWidth * 0.25;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const lightGeo = new THREE.SphereGeometry(lightRadius, 16, 8);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const redMat = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xaa0000, emissiveIntensity: 1 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const yellowMat = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xaaaa00, emissiveIntensity: 1 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const greenMat = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00aa00, emissiveIntensity: 1 });</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>const redLight = new THREE.Mesh(lightGeo, redMat); redLight.position.set(0, housingHeight * 0.3, housingDepth / 2 + 0.01); housing.add(redLight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const yellowLight = new THREE.Mesh(lightGeo, yellowMat); yellowLight.position.set(0, 0, housingDepth / 2 + 0.01); housing.add(yellowLight);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const greenLight = new THREE.Mesh(lightGeo, greenMat); greenLight.position.set(0, -housingHeight * 0.3, housingDepth / 2 + 0.01); housing.add(greenLight);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>return group;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Only one traffic light in view for now, more can be added later as a loop</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const trafficLightLeft = createTrafficLight();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const trafficLightRight = createTrafficLight();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const trafficLightZ = roadLength * 0.4;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const trafficLightX = roadWidth / 2 + kerbWidth + 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLightLeft.position.set(-trafficLightX, 0, trafficLightZ);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLightLeft.rotation.y = Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLightRight.position.set(trafficLightX, 0, trafficLightZ);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLightRight.rotation.y = -Math.PI / 2;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLights.push(trafficLightLeft, trafficLightRight);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(trafficLightLeft);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>scene.add(trafficLightRight);</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Points Setup ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointGeometry = new THREE.SphereGeometry(pointRadius, 16, 16); // More segments for smoother look</p>
+<p class="p1"><span class="Apple-converted-space">            </span>pointMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xaaaa00, emissiveIntensity: 0.8, metalness: 0.9, roughness: 0.1 });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = 0; i &lt; numPoints; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const point = new THREE.Mesh(pointGeometry, pointMaterial);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>resetPointPosition(point, true); // initial positions spread out</p>
+<p class="p1"><span class="Apple-converted-space">                </span>points.push(point);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(point);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Car Model Loading ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const loader = new GLTFLoader(loadingManager);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const dracoLoader = new DRACOLoader(loadingManager);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>loader.setDRACOLoader(dracoLoader);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Official Ferrari GLB URL</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const carUrl = 'https://threejs.org/examples/models/gltf/ferrari.glb';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>loader.load(carUrl, (gltf) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel = gltf.scene;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.scale.set(0.8, 0.8, 0.8); // Scale down for scene</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const box = new THREE.Box3().setFromObject(carModel);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carBaseY = -box.min.y + 0.01; // Adjust Y to sit on road</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.position.set(0, carBaseY, 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.rotation.y = Math.PI; // Face forward</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.traverse((node) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (node.isMesh) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>node.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>node.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// For PBR materials like in Ferrari model, environment map is key</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// Materials are generally MeshPhysicalMaterial</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(carModel);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// --- Enemy Car Setup (Clone Player Car) ---</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar = carModel.clone();</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.traverse((node) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (node.isMesh) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>// Create a distinct material for the enemy car (e.g., metallic blue)</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const originalMaterial = node.material;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const enemyMaterial = originalMaterial.clone();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>enemyMaterial.color.setHex(0x0000ff); // Set to blue</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>enemyMaterial.metalness = 0.9;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>enemyMaterial.roughness = 0.2;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>node.material = enemyMaterial;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>node.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>node.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const initialEnemyX = (Math.random() &lt; 0.5 ? -1 : 1) * roadWidth / 4;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.position.set(initialEnemyX, carBaseY, roadLength * 0.7); // Spawn further down the road</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.rotation.y = Math.PI; // Face forward initially, will be reversed for oncoming</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(enemyCar);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.log("Enemy car added and colored blue");</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Set initial Camera position AFTER carModel is loaded and carBaseY is known</p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.position.set(0, carBaseY + 3, -7);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.lookAt(carModel.position.x, carBaseY + 1, carModel.position.z + 5);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>}, undefined, (error) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Fallback for car model loading failure</p>
+<p class="p1"><span class="Apple-converted-space">                </span>console.error('An error happened loading the car model:', error);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const fallbackGeo = new THREE.BoxGeometry(2, 1, 4);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const fallbackMat = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: 0.5, metalness: 0.5 });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel = new THREE.Mesh(fallbackGeo, fallbackMat);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carBaseY = 0.5 + 0.01; // Default for fallback box</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.position.set(0, carBaseY, 0);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(carModel);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Fallback enemy car</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar = new THREE.Mesh(fallbackGeo, new THREE.MeshStandardMaterial({ color: 0x0000ff, roughness: 0.5, metalness: 0.5 }));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.position.set(roadWidth / 4, carBaseY, roadLength * 0.7);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.castShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.receiveShadow = true;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>scene.add(enemyCar);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.position.set(0, carBaseY + 3, -7);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.lookAt(carModel.position.x, carBaseY + 1, carModel.position.z + 5);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>loadingScreen.textContent = 'Error loading car model. Displaying fallback.';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>loadingScreen.classList.remove('hidden');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>loadingScreen.style.opacity = 1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Restart Button Listener ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>restartButton.addEventListener('click', restartGame);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Resize Listener ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>window.addEventListener('resize', onWindowResize, false);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Initial Score Display ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateScoreDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- Function to Set Up Controls (Keyboard &amp; Touch) ---</p>
+<p class="p1"><span class="Apple-converted-space">        </span>function setupControls() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Keyboard Listeners</p>
+<p class="p1"><span class="Apple-converted-space">            </span>window.addEventListener('keydown', (event) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (isGameOver) return;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { moveLeft = true; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>else if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { moveRight = true; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>window.addEventListener('keyup', (event) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { moveLeft = false; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>else if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { moveRight = false; }</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Touch Listeners for Buttons</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const leftButton = document.getElementById('left-button');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const rightButton = document.getElementById('right-button');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (leftButton) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Using 'pointerdown' and 'pointerup' for broader compatibility (mouse, touch, pen)</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// and to correctly handle multiple touches/gestures if needed, though 'touchstart'/'touchend' are fine for simple cases.</p>
+<p class="p1"><span class="Apple-converted-space">                </span>leftButton.addEventListener('pointerdown', (e) =&gt; { if (!isGameOver) { e.preventDefault(); moveRight = true; } }, { passive: false });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>leftButton.addEventListener('pointerup', (e) =&gt; { e.preventDefault(); moveRight = false; });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>leftButton.addEventListener('pointerleave', (e) =&gt; { // If finger slides off button while pressed</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (e.pointerType === 'touch') { moveRight = false; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (rightButton) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rightButton.addEventListener('pointerdown', (e) =&gt; { if (!isGameOver) { e.preventDefault(); moveLeft = true; } }, { passive: false });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rightButton.addEventListener('pointerup', (e) =&gt; { e.preventDefault(); moveLeft = false; });</p>
+<p class="p1"><span class="Apple-converted-space">                </span>rightButton.addEventListener('pointerleave', (e) =&gt; { // If finger slides off button while pressed</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (e.pointerType === 'touch') { moveLeft = false; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>// --- End Setup Controls ---</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function resetPointPosition(point, initial = false) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const laneWidth = roadWidth / 2 - kerbWidth - pointRadius * 2;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>point.position.x = (Math.random() * 2 - 1) * laneWidth;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>point.position.y = pointRadius + 0.01;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (initial) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.position.z = Math.random() * roadLength * 0.8 - roadLength * 0.4; // Initial spread within visible range</p>
+<p class="p1"><span class="Apple-converted-space">            </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.position.z = roadLength / 2 + Math.random() * roadLength * 0.5; // Spawn well ahead</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>point.visible = true;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function updateScoreDisplay() { scoreElement.textContent = `Score: ${score}`; }</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function onWindowResize() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>camera.aspect = window.innerWidth / window.innerHeight;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>camera.updateProjectionMatrix();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.setSize(window.innerWidth, window.innerHeight);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function animate() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>requestAnimationFrame(animate); // IMPORTANT: This creates the continuous game loop</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (isGameOver) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>renderer.render(scene, camera);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>return; // Stop game logic updates if game over</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const deltaZ = driveSpeed;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Scenery Movement and Recycling ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>roadLines.forEach(line =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>line.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (line.position.z &lt; -sceneryRecycleDistance) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>line.position.z += roadLength * 1.5; // Loop the lines</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>buildings.forEach(building =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>building.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (building.position.z &lt; -sceneryRecycleDistance - building.geometry.parameters.depth / 2) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const sideSign = Math.sign(building.position.x);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const xOffset = roadWidth / 2 + kerbWidth + 1 + Math.random() * 5 + building.geometry.parameters.width / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>building.position.set(sideSign * xOffset, building.geometry.parameters.height / 2, roadLength * 1.5 / 2 + Math.random() * buildingSpacing * 2);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>streetLights.forEach(light =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>light.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (light.position.z &lt; -sceneryRecycleDistance) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const sideSign = Math.sign(light.position.x);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const xPos = roadWidth / 2 + kerbWidth + 0.8;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>light.position.set(sideSign * xPos, 0, roadLength * 1.5 / 2 + Math.random() * lightSpacing * 2);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLights.forEach(light =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>light.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (light.position.z &lt; -sceneryRecycleDistance) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const sideSign = Math.sign(light.position.x);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const xPos = roadWidth / 2 + kerbWidth + 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>light.position.set(sideSign * xPos, 0, roadLength * 1.5 / 2 + Math.random() * roadLength * 0.5); // Spawn further out</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>kerbs.forEach(kerb =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>kerb.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (kerb.position.z &lt; -sceneryRecycleDistance) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>kerb.position.z += roadLength * 1.5;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Move and Recycle Points ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>points.forEach(point =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (!point.visible) return; // Only move visible points</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.position.z -= deltaZ;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>point.rotation.y += 0.05; // Coin rotation</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (point.position.z &lt; -sceneryRecycleDistance) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>resetPointPosition(point);</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Move Enemy Car ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (enemyCar &amp;&amp; carModel) { // Ensure both are loaded</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Enemy car moves forward relative to world, while road scrolls towards player.</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// This creates the illusion of the enemy coming towards the player.</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.position.z -= (enemyCarSpeed + driveSpeed); // Sum of own speed and road scroll speed</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (enemyCar.position.z &lt; -sceneryRecycleDistance) { // Recycle when it passes player</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>enemyCar.position.z = roadLength * 0.7 + Math.random() * roadLength * 0.5; // Spawn well ahead</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>enemyCar.position.x = (Math.random() &lt; 0.5 ? -1 : 1) * (roadWidth / 2 - kerbWidth - 1); // Random lane</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>enemyCar.rotation.y = Math.PI; // Ensure it's facing forward</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Handle Player Car Controls &amp; Update Bounding Box ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (carModel &amp;&amp; carBaseY &gt; 0) { // Ensure car model is loaded and positioned</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let maxBounds = roadWidth / 2 - kerbWidth - 0.1; // Default fallback bounds</p>
+<p class="p1"><span class="Apple-converted-space">                </span>let carHalfWidth = 1; // Default fallback for car width</p>
+<p class="p1"><span class="Apple-converted-space">                </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const box = new THREE.Box3().setFromObject(carModel);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>carHalfWidth = (box.max.x - box.min.x) / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>maxBounds = (roadWidth / 2) - kerbWidth - carHalfWidth - 0.1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>} catch (e) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// console.warn("Could not get car bounding box size, using default bounds.");</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (moveLeft &amp;&amp; carModel.position.x &gt; -maxBounds) { carModel.position.x -= carMoveSpeed; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (moveRight &amp;&amp; carModel.position.x &lt; maxBounds) { carModel.position.x += carMoveSpeed; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.position.x = Math.max(-maxBounds, Math.min(maxBounds, carModel.position.x));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>playerBox.setFromObject(carModel); // Always update player's bounding box</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Update Camera (smooth follow) ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (carModel) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const targetCameraX = carModel.position.x * 0.5; // Camera follows less drastically than car</p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.position.x += (targetCameraX - camera.position.x) * 0.1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>camera.lookAt(carModel.position.x, carBaseY + 1, carModel.position.z + 5);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Collision Detection ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (carModel) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Point Collision</p>
+<p class="p1"><span class="Apple-converted-space">                </span>points.forEach(point =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (!point.visible) return;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>pointBox.setFromObject(point);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (playerBox.intersectsBox(pointBox)) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>score += pointValue;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>updateScoreDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>point.visible = false; // Make point disappear</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>// Enemy Collision</p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (enemyCar &amp;&amp; enemyCar.parent) { // Ensure enemyCar is in scene</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>enemyBox.setFromObject(enemyCar);</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>// Use a slightly larger collision box for player for easier hits or vice versa</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const expandedPlayerBox = playerBox.clone().expandByScalar(0.5); // Increase player car's collision area slightly</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>if (expandedPlayerBox.intersectsBox(enemyBox)) {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>console.log("Collision with enemy!");</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>isGameOver = true;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>gameOverElement.style.display = 'flex'; // Show game over screen</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>}</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// --- Render ---</p>
+<p class="p1"><span class="Apple-converted-space">            </span>renderer.render(scene, camera);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>function restartGame() {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Reset game state</p>
+<p class="p1"><span class="Apple-converted-space">            </span>isGameOver = false;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>score = 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>updateScoreDisplay();</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gameOverElement.style.display = 'none';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Reset player car position</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (carModel) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>carModel.position.set(0, carBaseY, 0);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Reset enemy car position</p>
+<p class="p1"><span class="Apple-converted-space">            </span>if (enemyCar) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const initialEnemyX = (Math.random() &lt; 0.5 ? -1 : 1) * roadWidth / 4;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>enemyCar.position.set(initialEnemyX, carBaseY, roadLength * 0.7);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Reset points</p>
+<p class="p1"><span class="Apple-converted-space">            </span>points.forEach(point =&gt; resetPointPosition(point, true));</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Reset scenery positions (optional, they will naturally loop back)</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Re-initializing positions for a "fresh" start visual.</p>
+<p class="p1"><span class="Apple-converted-space">            </span>roadLines.forEach((line, i) =&gt; { line.position.z = (roadLength * 1.5 / 2) - (line.geometry.parameters.height / 2) - i * (line.geometry.parameters.height + 4); });</p>
+<p class="p1"><span class="Apple-converted-space">            </span>buildings.forEach((building, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const zPos = (roadLength * 1.5 / 2) - (buildingSpacing / 2) - (i % (numBuildings / 2)) * buildingSpacing; // Recalculate based on original distribution</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const sideSign = (i % 2 === 0) ? -1 : 1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xOffset = roadWidth / 2 + kerbWidth + 1 + Math.random() * 5 + building.geometry.parameters.width / 2;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>building.position.set(sideSign * xOffset, building.geometry.parameters.height / 2, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>streetLights.forEach((light, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const zPos = (roadLength * 1.5 / 2) - (lightSpacing / 2) - (i % (numLights / 2)) * lightSpacing;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const sideSign = (i % 2 === 0) ? -1 : 1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xPos = roadWidth / 2 + kerbWidth + 0.8;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>light.position.set(sideSign * xPos, 0, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p1"><span class="Apple-converted-space">            </span>trafficLights.forEach((light, i) =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const zPos = roadLength * 0.4; // Fixed traffic light</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const sideSign = (i % 2 === 0) ? -1 : 1;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const xPos = roadWidth / 2 + kerbWidth + 0.5;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>light.position.set(sideSign * xPos, 0, zPos);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>});</p>
+<p class="p2"><br></p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>// The animate loop is continuously running, so no need to call it again.</p>
+<p class="p1"><span class="Apple-converted-space">            </span>// Just setting isGameOver to false will resume game logic.</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
